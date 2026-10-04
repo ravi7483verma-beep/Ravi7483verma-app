@@ -24,6 +24,7 @@ jobs:
 
       - name: Make gradlew executable and build APK
         run: |
+          cd Ravi7483vermaPrototype
           chmod +x gradlew
           ./gradlew assembleDebug
 
@@ -32,6 +33,7 @@ jobs:
         with:
           name: app-debug-apk
           path: '**/build/outputs/apk/debug/*.apk'
+          
 
           
           
