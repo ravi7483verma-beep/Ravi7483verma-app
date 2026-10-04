@@ -26,31 +26,31 @@ jobs:
             unzip -o Ravi7483vermaPrototype.zip
           fi
 
-      # 2. Fix Java/Kotlin Version Mismatch inside build.gradle.kts automatically
-      - name: Fix JVM Target and Build APK
+      # 2. Automatically replace Java 1.8 with Java 17 in all gradle files
+      - name: Auto-fix JVM Target to 17 in Gradle Files
+        run: |
+          find . -name "build.gradle*" -exec sed -i 's/VERSION_1_8/VERSION_17/g' {} +
+          find . -name "build.gradle*" -exec sed -i 's/"1.8"/"17"/g' {} +
+          find . -name "build.gradle*" -exec sed -i "s/'1.8'/'17'/g" {} +
+
+      # 3. Build APK
+      - name: Make gradlew executable and build APK
         run: |
           if [ -d "Ravi7483vermaPrototype" ]; then
             cd Ravi7483vermaPrototype
           fi
-          
-          # Force gradle properties to use Java 17
-          echo "kotlin.compiler.jvmTarget=17" >> gradle.properties
-          echo "org.gradle.java.home=$JAVA_HOME" >> gradle.properties
-          
           if [ ! -f "gradlew" ]; then
             gradle wrapper
           fi
-          
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleDebug
 
-      # 3. Upload Output APK
+      # 4. Upload Generated APK
       - name: Upload Generated APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
           path: '**/build/outputs/apk/debug/*.apk'
           
-        
           
           
