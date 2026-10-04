@@ -25,7 +25,7 @@ jobs:
           cd project_files
           if [ -f "gradlew" ]; then
             chmod +x gradlew
-            ./gradlew assembleDebug
+            ./gradlew assembleDebu
           fi
 
       - name: Upload APK Artifact
