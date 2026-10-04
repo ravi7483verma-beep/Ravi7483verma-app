@@ -19,14 +19,14 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      # 1. Unzip if zip file is present
+      # 1. Unzip source code if present
       - name: Unzip project source code
         run: |
           if [ -f "Ravi7483vermaPrototype.zip" ]; then
             unzip -o Ravi7483vermaPrototype.zip
           fi
 
-      # 2. Build APK with Kotlin target fix
+      # 2. Make gradlew executable and build APK with JVM Target 17
       - name: Make gradlew executable and build APK
         run: |
           if [ -d "Ravi7483vermaPrototype" ]; then
@@ -36,7 +36,7 @@ jobs:
             gradle wrapper
           fi
           chmod +x gradlew
-          ./gradlew assembleDebug -Pkotlin.compiler.jvmTarget=17
+          ./gradlew assembleDebug -Pkotlin.compiler.jvmTarget=17 --stacktrace
 
       # 3. Upload Generated APK
       - name: Upload Generated APK
@@ -44,6 +44,7 @@ jobs:
         with:
           name: app-debug-apk
           path: '**/build/outputs/apk/debug/*.apk'
+          
           
         
           
