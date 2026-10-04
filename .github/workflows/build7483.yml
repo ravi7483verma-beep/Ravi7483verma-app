@@ -13,19 +13,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Java 17 आवश्यक है Gradle 8+ चलाने के लिए
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
+      # 1. Unzip if zip file is present
       - name: Unzip project source code
         run: |
           if [ -f "Ravi7483vermaPrototype.zip" ]; then
             unzip -o Ravi7483vermaPrototype.zip
           fi
 
+      # 2. Build APK with Kotlin target fix
       - name: Make gradlew executable and build APK
         run: |
           if [ -d "Ravi7483vermaPrototype" ]; then
@@ -35,15 +36,15 @@ jobs:
             gradle wrapper
           fi
           chmod +x gradlew
-          # -Dorg.gradle.jvmargs जावा वर्ज़न के मिसमैच को रोक देगा
-          ./gradlew assembleDebug -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=512m"
+          ./gradlew assembleDebug -Pkotlin.compiler.jvmTarget=17
 
+      # 3. Upload Generated APK
       - name: Upload Generated APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
           path: '**/build/outputs/apk/debug/*.apk'
-
+          
         
           
           
