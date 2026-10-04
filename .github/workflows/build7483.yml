@@ -19,21 +19,30 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      # 1. Zip फ़ाइल खोलें
+      # 1. Zip फ़ाइल अनज़िप करें
       - name: Unzip project source code
         run: |
           if [ -f "Ravi7483vermaPrototype.zip" ]; then
             unzip -o Ravi7483vermaPrototype.zip
           fi
 
-      # 2. फ़ाइलों के अंदर छुपे 1.8 को ऑटो-फ़िक्स करके 17 करें
-      - name: Auto-fix JVM Target in project files
+      # 2. JVM Validation को बायपास करें और Java 17 सेट करें
+      - name: Configure Properties and Override Java 17
         run: |
-          find . -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i 's/VERSION_1_8/VERSION_17/g' {} +
-          find . -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i 's/"1.8"/"17"/g' {} +
-          find . -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i "s/'1.8'/'17'/g" {} +
+          PROJ_DIR="Ravi7483vermaPrototype"
+          if [ ! -d "$PROJ_DIR" ]; then PROJ_DIR="."; fi
 
-      # 3. APK बिल्ड करें
+          # Validate mismatch error को इग्नोर करें
+          echo "kotlin.jvm.target.validation.mode=IGNORE" >> $PROJ_DIR/gradle.properties
+          echo "org.gradle.java.home=$JAVA_HOME" >> $PROJ_DIR/gradle.properties
+
+          # 1.8 वर्ज़न को 17 से रिप्लेस करें
+          find $PROJ_DIR -type f \( -name "*.gradle*" -o -name "*.kts" \) -exec sed -i 's/JavaVersion.VERSION_1_8/JavaVersion.VERSION_17/g' {} +
+          find $PROJ_DIR -type f \( -name "*.gradle*" -o -name "*.kts" \) -exec sed -i 's/VERSION_1_8/VERSION_17/g' {} +
+          find $PROJ_DIR -type f \( -name "*.gradle*" -o -name "*.kts" \) -exec sed -i 's/"1.8"/"17"/g' {} +
+          find $PROJ_DIR -type f \( -name "*.gradle*" -o -name "*.kts" \) -exec sed -i "s/'1.8'/'17'/g" {} +
+
+      # 3. APK का निर्माण करें
       - name: Make gradlew executable and build APK
         run: |
           if [ -d "Ravi7483vermaPrototype" ]; then
@@ -43,9 +52,9 @@ jobs:
             gradle wrapper
           fi
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --no-daemon
 
-      # 4. APK अपलोड करें
+      # 4. APK डाउनलोड के लिए अपलोड करें
       - name: Upload Generated APK
         uses: actions/upload-artifact@v4
         with:
