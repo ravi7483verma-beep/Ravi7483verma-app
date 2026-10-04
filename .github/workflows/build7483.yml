@@ -1,25 +1,44 @@
--- Users Table
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(150) UNIQUE NOT NULL,
-    mobile VARCHAR(15) UNIQUE NOT NULL,
-    user_id VARCHAR(50) UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
-    profile_photo TEXT,
-    account_status VARCHAR(20) DEFAULT 'active', -- 'active', 'deactivated'
-    role VARCHAR(20) DEFAULT 'user', -- 'user', 'admin'
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+name: Build Android APK
 
--- Sessions Table
-CREATE TABLE sessions (
-    id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES users(id) ON DELETE CASCADE,
-    token TEXT NOT NULL,
-    ip_address VARCHAR(45),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    expires_at TIMESTAMP NOT NULL
-);
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
 
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Unzip project source code
+        run: |
+          if [ -f "Ravi7483vermaPrototype.zip" ]; then
+            unzip -o Ravi7483vermaPrototype.zip
+          fi
+
+      - name: Make gradlew executable and build APK
+        run: |
+          if [ -d "Ravi7483vermaPrototype" ]; then
+            cd Ravi7483vermaPrototype
+          fi
+          if [ ! -f "gradlew" ]; then
+            gradle wrapper
+          fi
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload Generated APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: '**/build/outputs/apk/debug/*.apk'
+          
