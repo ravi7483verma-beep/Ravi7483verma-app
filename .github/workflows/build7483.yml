@@ -2,7 +2,7 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "master" ]
   workflow_dispatch:
 
 jobs:
@@ -13,11 +13,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      # जावा 1.8 सेट किया गया है ताकि Kotlin और Java का कंपाइलर मैच करे
+      - name: Set up JDK 8
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '8'
 
       - name: Unzip project source code
         run: |
@@ -34,11 +35,12 @@ jobs:
             gradle wrapper
           fi
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug -Dorg.gradle.java.home=$JAVA_HOME
 
       - name: Upload Generated APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
           path: '**/build/outputs/apk/debug/*.apk'
+          
           
