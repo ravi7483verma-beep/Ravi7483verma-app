@@ -2,7 +2,7 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "master" ]
   workflow_dispatch:
 
 jobs:
@@ -19,20 +19,41 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      # 1. Check & Unzip Zip file if present
       - name: Unzip project source code
-        run: unzip -o Ravi7483vermaPrototype.zip
+        run: |
+          if [ -f "Ravi7483vermaPrototype.zip" ]; then
+            echo "Unzipping Ravi7483vermaPrototype.zip..."
+            unzip -o Ravi7483vermaPrototype.zip
+          else
+            echo "No zip file found, using repository files directly."
+          fi
 
+      # 2. Check Directory & Grant Permissions & Build APK
       - name: Make gradlew executable and build APK
         run: |
-          cd Ravi7483vermaPrototype
-          chmod +x gradlew
-          ./gradlew assembleDebug
+          if [ -d "Ravi7483vermaPrototype" ]; then
+            cd Ravi7483vermaPrototype
+          fi
+          
+          if [ -f "gradlew" ]; then
+            chmod +x gradlew
+            ./gradlew assembleDebug --stacktrace
+          else
+            echo "ERROR: gradlew file not found!"
+            ls -la
+            exit 1
+          fi
 
+      # 3. Upload Output APK
       - name: Upload Generated APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
           path: '**/build/outputs/apk/debug/*.apk'
+
+
+      
           
 
           
