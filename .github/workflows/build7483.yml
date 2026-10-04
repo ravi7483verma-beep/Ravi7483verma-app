@@ -19,21 +19,21 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      # 1. Unzip source code
+      # 1. Zip फ़ाइल खोलें
       - name: Unzip project source code
         run: |
           if [ -f "Ravi7483vermaPrototype.zip" ]; then
             unzip -o Ravi7483vermaPrototype.zip
           fi
 
-      # 2. Automatically replace Java 1.8 with Java 17 in all gradle files
-      - name: Auto-fix JVM Target to 17 in Gradle Files
+      # 2. Java और Kotlin वर्ज़न 17 फ़िक्स करें
+      - name: Force Java 17 and Kotlin 17 Compatibility
         run: |
-          find . -name "build.gradle*" -exec sed -i 's/VERSION_1_8/VERSION_17/g' {} +
+          find . -name "build.gradle*" -exec sed -i 's/JavaVersion.VERSION_1_8/JavaVersion.VERSION_17/g' {} +
           find . -name "build.gradle*" -exec sed -i 's/"1.8"/"17"/g' {} +
           find . -name "build.gradle*" -exec sed -i "s/'1.8'/'17'/g" {} +
 
-      # 3. Build APK
+      # 3. APK बिल्ड करें
       - name: Make gradlew executable and build APK
         run: |
           if [ -d "Ravi7483vermaPrototype" ]; then
@@ -43,9 +43,9 @@ jobs:
             gradle wrapper
           fi
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug -Pandroid.compileOptions.sourceCompatibility=17 -Pandroid.compileOptions.targetCompatibility=17 -Pkotlin.compiler.jvmTarget=17
 
-      # 4. Upload Generated APK
+      # 4. APK अपलोड करें
       - name: Upload Generated APK
         uses: actions/upload-artifact@v4
         with:
