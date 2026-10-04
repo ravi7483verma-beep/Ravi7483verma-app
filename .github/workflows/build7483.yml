@@ -26,12 +26,12 @@ jobs:
             unzip -o Ravi7483vermaPrototype.zip
           fi
 
-      # 2. Java और Kotlin वर्ज़न 17 फ़िक्स करें
-      - name: Force Java 17 and Kotlin 17 Compatibility
+      # 2. फ़ाइलों के अंदर छुपे 1.8 को ऑटो-फ़िक्स करके 17 करें
+      - name: Auto-fix JVM Target in project files
         run: |
-          find . -name "build.gradle*" -exec sed -i 's/JavaVersion.VERSION_1_8/JavaVersion.VERSION_17/g' {} +
-          find . -name "build.gradle*" -exec sed -i 's/"1.8"/"17"/g' {} +
-          find . -name "build.gradle*" -exec sed -i "s/'1.8'/'17'/g" {} +
+          find . -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i 's/VERSION_1_8/VERSION_17/g' {} +
+          find . -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i 's/"1.8"/"17"/g' {} +
+          find . -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i "s/'1.8'/'17'/g" {} +
 
       # 3. APK बिल्ड करें
       - name: Make gradlew executable and build APK
@@ -43,7 +43,7 @@ jobs:
             gradle wrapper
           fi
           chmod +x gradlew
-          ./gradlew assembleDebug -Pandroid.compileOptions.sourceCompatibility=17 -Pandroid.compileOptions.targetCompatibility=17 -Pkotlin.compiler.jvmTarget=17
+          ./gradlew assembleDebug
 
       # 4. APK अपलोड करें
       - name: Upload Generated APK
@@ -51,6 +51,4 @@ jobs:
         with:
           name: app-debug-apk
           path: '**/build/outputs/apk/debug/*.apk'
-          
-          
           
