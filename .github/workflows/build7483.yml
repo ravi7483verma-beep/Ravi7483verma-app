@@ -19,32 +19,37 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      # 1. Unzip source code if present
+      # 1. Unzip source code
       - name: Unzip project source code
         run: |
           if [ -f "Ravi7483vermaPrototype.zip" ]; then
             unzip -o Ravi7483vermaPrototype.zip
           fi
 
-      # 2. Make gradlew executable and build APK with JVM Target 17
-      - name: Make gradlew executable and build APK
+      # 2. Fix Java/Kotlin Version Mismatch inside build.gradle.kts automatically
+      - name: Fix JVM Target and Build APK
         run: |
           if [ -d "Ravi7483vermaPrototype" ]; then
             cd Ravi7483vermaPrototype
           fi
+          
+          # Force gradle properties to use Java 17
+          echo "kotlin.compiler.jvmTarget=17" >> gradle.properties
+          echo "org.gradle.java.home=$JAVA_HOME" >> gradle.properties
+          
           if [ ! -f "gradlew" ]; then
             gradle wrapper
           fi
+          
           chmod +x gradlew
-          ./gradlew assembleDebug -Pkotlin.compiler.jvmTarget=17 --stacktrace
+          ./gradlew assembleDebug --stacktrace
 
-      # 3. Upload Generated APK
+      # 3. Upload Output APK
       - name: Upload Generated APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
           path: '**/build/outputs/apk/debug/*.apk'
-          
           
         
           
